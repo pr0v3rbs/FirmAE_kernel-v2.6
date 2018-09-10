@@ -27,6 +27,8 @@
 #define LEVEL_FS_R    (1 << 3)
 /* Process execution operations; e.g. mmap, fork, etc */
 #define LEVEL_EXEC    (1 << 4)
+/* Process execution checker; e.g. popen, system, execve, etc */
+#define LEVEL_ANALYZE (1 << 5)
 
 #define SYSCALL_HOOKS \
 	/* Hook network binds */ \
@@ -278,6 +280,18 @@ static void execve_hook(char *filename, const char __user *const __user *argv, c
 		printk(KERN_CONT ", envp:");
 		for (i = 0; i >= 0 && i < count(envp, MAX_ARG_STRINGS); i++) {
 			printk(KERN_CONT " %s", envp[i]);
+		}
+	}
+
+	if (syscall & LEVEL_ANALYZE && strcmp("khelper", current->comm)) {
+		if (argv[0][0] != '[' && !strstr(current->comm, ".sh") && strcmp(current->comm, "sh") && strcmp(current->comm, "rcS"))
+		{
+			printk("\n\n[ANALYZE] [PID: %d (%s)]:", task_pid_nr(current), current->comm);
+			for (i = 0; i >= 0 && argv[i]; i++) {
+				printk(KERN_CONT " %s", argv[i]);
+			}
+
+			printk("\n\n");
 		}
 	}
 
