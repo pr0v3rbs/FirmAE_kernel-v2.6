@@ -284,15 +284,12 @@ static void execve_hook(char *filename, const char __user *const __user *argv, c
 	}
 
 	if (syscall & LEVEL_ANALYZE && strcmp("khelper", current->comm)) {
-		if (argv[0][0] != '[' && strcmp(current->comm, "rcS"))
-		{
-			printk("\n\n[ANALYZE] [PID: %d (%s)]:", task_pid_nr(current), current->comm);
-			for (i = 0; i >= 0 && argv[i]; i++) {
-				printk(KERN_CONT " %s", argv[i]);
-			}
-
-			printk("\n\n");
+		printk("\n\n[ANALYZE] [PID: %d (%s)]:", task_pid_nr(current), current->comm);
+		for (i = 0; i >= 0 && argv[i]; i++) {
+			printk(KERN_CONT " %s", argv[i]);
 		}
+
+		printk("\n\n");
 	}
 
 	jprobe_return();
