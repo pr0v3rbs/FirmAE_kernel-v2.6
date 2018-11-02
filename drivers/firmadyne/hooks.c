@@ -283,10 +283,22 @@ static void execve_hook(char *filename, const char __user *const __user *argv, c
 		}
 	}
 
-	if (syscall & LEVEL_ANALYZE && strcmp("khelper", current->comm)) {
+	if (syscall & LEVEL_ANALYZE &&
+		strcmp("khelper", current->comm) &&
+		strcmp("rcS", current->comm) &&
+		strcmp("preInit.sh", current->comm) &&
+		strcmp("network.sh", current->comm) &&
+		strcmp("run_service.sh", current->comm) &&
+		argv[0][0] != '[') // generally compare line
+	{
 		printk("\n\n[ANALYZE] [PID: %d (%s)]:", task_pid_nr(current), current->comm);
 		for (i = 0; i >= 0 && argv[i]; i++) {
 			printk(KERN_CONT " %s", argv[i]);
+		}
+
+		printk(KERN_CONT "\nenvp:");
+		for (i = 0; i >= 0 && envp[i]; i++) {
+			printk(KERN_CONT " %s", envp[i]);
 		}
 
 		printk("\n\n");
